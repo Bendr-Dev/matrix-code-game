@@ -5,22 +5,22 @@ const matrix = [];
 const difficulty = 5;
 
 /**
- * Creates an array of hex values to be used for game
+ * Creates an array of byte values in hexadecimal to be used for game
  */
 const generateHexValues = (difficulty) => {
     if (matrixHexValues.length !== 0)
         matrixHexValues.splice(0, matrixHexValues.length);
     
     for (let index = 0; index < difficulty; index++) {
-        let randomHexValue = generateHexValue();
+        let randomHexValue = generateByteValue();
         matrixHexValues.push(randomHexValue);
     }
 }
 
 /**
- * Creates a single hex value ranging from 0 to FF
+ * Creates a byte value ranging from 00 to FF
  */
-const generateHexValue = () => {
+const generateByteValue = () => {
     let value1 = convertNumberToHex(parseInt(Math.random() * 15));
     let value2 = convertNumberToHex(parseInt(Math.random() * 15));
 
@@ -73,3 +73,30 @@ const convertNumberToHex = (number) => {
         }
     }
 }
+
+/**
+ * Add generated rows to display
+ */
+const displayMatrix = () => {
+    if (matrix.length > 0) {
+        matrix.forEach((row) => {
+            let newRow = createRow(row);
+            matrixDisplay.appendChild(newRow);
+        });
+    }
+}
+
+const createRow = (row) => {
+    let newRowElement = document.createElement("div");
+    row.forEach((byte) => {
+        let newByteElement = document.createElement("div");
+        newByteElement.innerHTML = byte;
+        newRowElement.appendChild(newByteElement);
+    });
+
+    return newRowElement;
+}
+
+generateHexValues(difficulty);
+generateMatrix(difficulty);
+displayMatrix();
