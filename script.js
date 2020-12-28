@@ -1,19 +1,20 @@
 const matrixDisplay = document.getElementById("code-matrix-content");
 
-const matrixHexValues = [];
+const matrixByteValues = [];
 const matrix = [];
+const sequences = [];
 const difficulty = 5;
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
  */
-const generateHexValues = (difficulty) => {
-    if (matrixHexValues.length !== 0)
-        matrixHexValues.splice(0, matrixHexValues.length);
+const generateByteValues = (difficulty) => {
+    if (matrixByteValues.length !== 0)
+        matrixByteValues.splice(0, matrixByteValues.length);
     
     for (let index = 0; index < difficulty; index++) {
-        let randomHexValue = generateByteValue();
-        matrixHexValues.push(randomHexValue);
+        let randomByteValue = generateByteValue();
+        matrixByteValues.push(randomByteValue);
     }
 }
 
@@ -44,7 +45,7 @@ const generateMatrix = (difficulty) => {
 const generateRow = (difficulty) => {
     let row = [];
     for (let index = 0; index < difficulty; index++) {
-        row.push(matrixHexValues[parseInt(Math.random() * 4)]);
+        row.push(matrixByteValues[parseInt(Math.random() * (difficulty - 1))]);
     }   
     return row;
 }
@@ -86,6 +87,10 @@ const displayMatrix = () => {
     }
 }
 
+/**
+ * Creates a div element representing a row containing more div elements with byte values
+ * @param {number[]} row: Row containing byte values
+ */
 const createRow = (row) => {
     let newRowElement = document.createElement("div");
     row.forEach((byte) => {
@@ -97,6 +102,18 @@ const createRow = (row) => {
     return newRowElement;
 }
 
-generateHexValues(difficulty);
+const createSequence = (difficulty) => {
+    let numberOfSequenceValues = parseInt((Math.random() * (difficulty - 2)) + 1);
+    let sequence = [];
+
+    for (let index = 0; index < numberOfSequenceValues; index++) {
+        sequence.push(matrixByteValues[parseInt(Math.random() * (difficulty - 1))]);
+    }
+
+    // Check if sequence is valid with matrix
+    sequences.push(sequence);
+}
+
+generateByteValues(difficulty);
 generateMatrix(difficulty);
 displayMatrix();

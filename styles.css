@@ -13,7 +13,7 @@ body {
   flex-direction: column;
   margin: 0;
   font-family: "Open Sans Condensed", sans-serif;
-  background-color: #111;
+  background-color: #212121;
 }
 
 /* Header */
@@ -25,14 +25,14 @@ header {
 
 header h1 {
   padding: 1rem;
-  background-color: #111;
-  color: #c8ff00;
+  background-color: #212121;
+  color: #ffc107;
 }
 
 /* Content for page */
 main {
   margin: 0rem 5rem;
-  border: 1px solid #c8ff00;
+  border: 1px solid #ffc107;
   border-radius: 2px;
 }
 
@@ -42,13 +42,13 @@ section:first-of-type {
   flex-direction: row;
   justify-content: space-around;
   margin: 3rem 0rem 0.5rem 0rem;
-  border: 1px solid rgba(200, 255, 0, 0.2);
-  background-color: rgba(200, 255, 0, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  background-color: rgba(255, 193, 7, 0.1);
 }
 
 section:first-of-type h2 {
   padding: 0rem 5rem;
-  color: #c8ff00;
+  color: #ffc107;
   font-size: 28px;
 }
 section:first-of-type > div {
@@ -61,8 +61,8 @@ section:first-of-type > div > div {
   margin: 0rem 1rem;
   width: 150px;
   height: 50px;
-  border: 1px solid #c8ff00;
-  background-color: #111;
+  border: 1px solid #ffc107;
+  background-color: #212121;
 }
 
 /* Code Matrix & Sequence */
@@ -74,37 +74,35 @@ section:last-of-type {
 /* Sequence */
 #code-sequence {
   margin: 2rem;
-  border: 1px solid #c8ff00;
+  border: 1px solid #ffc107;
   width: 800px;
   /* height: 200px; */
-  border-radius: 20px 2px 2px 2px;
+  border-radius: 2px;
 }
 
 #code-sequence div:first-of-type h3 {
   padding: 1rem;
   margin: 0;
-  border-bottom: 1px solid #c8ff00;
+  border-bottom: 1px solid #ffc107;
   font-size: 36px;
-  color: #c8ff00;
-  border-radius: 15px 0px 0px 0px;
+  color: #ffc107;
 }
 
 /* Code Matrix Grid */
 #code-matrix {
   margin: 2rem;
-  border: 1px solid #c8ff00;
+  border: 1px solid #ffc107;
   width: 800px;
   height: 600px;
-  border-radius: 20px 2px 2px 2px;
+  border-radius: 2px;
 }
 
 #code-matrix div:first-of-type h3 {
   padding: 1rem;
   margin: 0;
-  background-color: #c8ff00;
+  background-color: #ffc107;
   font-size: 36px;
   color: #111;
-  border-radius: 15px 0px 0px 0px;
 }
 
 #code-matrix-content {
@@ -118,18 +116,26 @@ section:last-of-type {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  align-items: center;
 }
 
 #code-matrix-content > div div {
-  color: #00ffff;
+  color: #ffc107;
   width: 50px;
   height: 50px;
-  font-size: 28px;
+  font-size: 32px;
   margin: 1rem;
   text-align: center;
+  font-weight: 700;
+  border: 3px solid #212121;
 }
 
-#code-matrix-content > div div:hover {
+/* #code-matrix-content > div div:hover {
   cursor: pointer;
-  border: 3px solid #00ffff;
+  border: 3px solid #536dfe;
+  background-color: rgba(83, 109, 254, 0.3);
+} */
+
+.row-hover {
+  background-color: rgba(83, 109, 254, 0.2);
 }
