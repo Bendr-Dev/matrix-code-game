@@ -7,6 +7,7 @@ const difficulty = 5;
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
+ * @param {number} difficulty: Number of rows to generate
  */
 const generateByteValues = (difficulty) => {
     if (matrixByteValues.length !== 0)
@@ -102,8 +103,12 @@ const createRow = (row) => {
     return newRowElement;
 }
 
+/**
+ * Creates a valid sequence based off of the generated matrix
+ * @param {number} difficulty: Determine the potential size of sequence
+ */
 const createSequence = (difficulty) => {
-    let numberOfSequenceValues = parseInt((Math.random() * (difficulty - 2)) + 1);
+    let numberOfSequenceValues = parseInt((Math.random() * 2) + (difficulty - 3));
     let sequence = [];
 
     for (let index = 0; index < numberOfSequenceValues; index++) {
@@ -112,6 +117,71 @@ const createSequence = (difficulty) => {
 
     // Check if sequence is valid with matrix
     sequences.push(sequence);
+}
+
+/**
+ * Tests values of sequence and validates sequence with given matrix
+ * @param {number[]} sequence: number combinations to be validated 
+ * @param {number[][]} matrix: matrix which the sequence will be tested on
+ * @param {number} difficulty: Used to calculate buffer size
+ */
+const checkSequence =
+    (seqPosition, matrix, genSequence, currSequence, difficulty, isRowCheck, bufferCount, currRow, currCol) => {
+    let maxBufferSize = difficulty - 1;
+    let isPattern = false;
+
+    if (isValid(genSequence, currSequence))
+        isPattern = true;
+
+    while (!isPattern && bufferCount < maxBufferSize) {
+        if (isRowCheck) {
+            // Row check
+            matrix[currRow].forEach((colSequenceValue, index) => {
+                if (isValid(colSequenceValue, genSequence[seqPosition])) {
+                    currSequence.push(colSequenceValue);
+                    currCol = index;
+                    seqPosition += 1;
+                    bufferCount += 1;
+                    isRowCheck = !isRowCheck;
+                    checkSequence(...arguments);
+                } else {
+                    // Go through incorrect sequence value to find correct sequence value
+                }
+            });
+        } else {
+            // Column check
+        }
+    }
+
+    if (isPattern)
+        return true;
+    else return false;
+}
+
+/**
+ * Compares two values or two arrays
+ * @param {any} value: First value to compare
+ * @param {any} secondValue: Second value to compare with first value
+ * @returns boolean
+ */
+const isValid = (value, secondValue) => {
+    if (typeof value !== typeof secondValue)
+        return false;
+
+    if (typeof value !== "object") 
+        return value === secondValue;
+    
+    if (value.length !== secondValue.length)
+        return false;
+    else {
+        let valid = true;
+        value.forEach((value, index) => {
+            if (value !== secondValue[index]) {
+                valid = false;
+            }
+        });
+        return valid;
+    }
 }
 
 generateByteValues(difficulty);
