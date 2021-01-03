@@ -126,9 +126,10 @@ const createSequence = (difficulty) => {
  * @param {number} difficulty: Used to calculate buffer size
  */
 const checkSequence =
-    (seqPosition, matrix, genSequence, currSequence, difficulty, isRowCheck, bufferCount, currRow, currCol) => {
+    (seqPosition, matrix, genSequence, currSequence, difficulty, isRowCheck, bufferCount, currRow, currCol, lastIndex) => {
     let maxBufferSize = difficulty - 1;
     let isPattern = false;
+    let matchFound = false;
 
     if (isValid(genSequence, currSequence))
         isPattern = true;
@@ -136,20 +137,45 @@ const checkSequence =
     while (!isPattern && bufferCount < maxBufferSize) {
         if (isRowCheck) {
             // Row check
+            // First check if there's a matching value with current sequence value being sought after
             matrix[currRow].forEach((colSequenceValue, index) => {
-                if (isValid(colSequenceValue, genSequence[seqPosition])) {
+                if (isValid(colSequenceValue, genSequence[seqPosition]) && index !== lastIndex) {
                     currSequence.push(colSequenceValue);
                     currCol = index;
                     seqPosition += 1;
                     bufferCount += 1;
                     isRowCheck = !isRowCheck;
+                    matchFound = true;
                     checkSequence(...arguments);
-                } else {
-                    // Go through incorrect sequence value to find correct sequence value
                 }
             });
+            // Brute force tatic in case there's no matching sequence value 
+            if (!matchFound) {
+                currSequence.splice(0, currSequence.length);
+                seqPosition = -1;
+                matrix[currRow].forEach((colSequenceValue, index) => {
+                    currSequence.push(colSequenceValue);
+                    currCol = index;
+                    seqPosition += 1;
+                    bufferCount += 1;
+                    isRowCheck = !isRowCheck;
+                    matchFound = true;
+                    checkSequence(...arguments);
+                });
+            }
         } else {
             // Column check
+            for (let index = 0; index < matrix[currRow].length; index++) {
+                if (isValid(matrix[index][currCol], genSequence[seqPosition])) {
+                    currSequence.push(matrix[index][currCol]);
+                    currRow = index;
+                    seqPosition += 1;
+                    bufferCount += 1;
+                    isRowCheck = !isRowCheck;
+                    matchFound = true;
+                    checkSequence(...arguments);
+                }
+            }
         }
     }
 
