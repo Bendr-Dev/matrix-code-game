@@ -1,10 +1,12 @@
 const matrixDisplay = document.getElementById("code-matrix-content");
+const sequenceDisplay = document.getElementById("code-sequence-content");
 
 const matrixByteValues = [];
 const matrix = [];
 const sequences = [];
 const difficulty = 5;
 const bufferCount = 8;
+const bufferSeq = [];
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
@@ -194,6 +196,22 @@ const getNextValue = (isRowSearch, prevSelection, matrix) => {
     return value;
 }
 
+const displaySequences = (sequences, sequenceDisplay) => {
+    while (sequenceDisplay.firstChild) {
+        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
+    }
+
+    sequences.forEach((sequence) => {
+        let newSequenceDiv = document.createElement("div");
+        sequence.forEach((seqValue) => {
+            let newSeqValueDiv = document.createElement("div");
+            newSeqValueDiv.innerHTML = seqValue;
+            newSequenceDiv.appendChild(newSeqValueDiv);
+        });
+        sequenceDisplay.appendChild(newSequenceDiv);
+    });
+}
+
 
 /**
  * Compares two values or two arrays
@@ -225,3 +243,4 @@ generateByteValues(difficulty);
 generateMatrix(difficulty);
 displayMatrix();
 createSequences(bufferCount, matrix);
+displaySequences(sequences, sequenceDisplay);

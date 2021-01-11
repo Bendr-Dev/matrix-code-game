@@ -88,6 +88,23 @@ section:last-of-type {
   color: #ffc107;
 }
 
+#code-sequence-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+#code-sequence-content > div {
+  display: flex;
+  flex-direction: row;
+}
+
+#code-sequence-content > div div {
+  margin: 0.5rem;
+  font-size: 32px;
+  color: #ffc107;
+}
+
 /* Code Matrix Grid */
 #code-matrix {
   margin: 2rem;
@@ -128,12 +145,6 @@ section:last-of-type {
   text-align: center;
   border: 3px solid #212121;
 }
-
-/* #code-matrix-content > div div:hover {
-  cursor: pointer;
-  border: 3px solid #536dfe;
-  background-color: rgba(83, 109, 254, 0.3);
-} */
 
 .row-hover {
   background-color: rgba(83, 109, 254, 0.2);
