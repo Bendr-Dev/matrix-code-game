@@ -22,6 +22,7 @@ const generateByteValues = (difficulty) => {
 
 /**
  * Creates a byte value ranging from 00 to FF
+ * @returns {String}
  */
 const generateByteValue = () => {
     let value1 = convertNumberToHex(Math.floor(Math.random() * 15));
@@ -43,6 +44,7 @@ const generateMatrix = (difficulty) => {
 /**
  * Creates a row of random values from the generated hex values
  * @param {number} difficulty: Number of columns to generate (length of array)
+ * @returns {String[]}
  */
 const generateRow = (difficulty) => {
     let row = [];
@@ -54,7 +56,8 @@ const generateRow = (difficulty) => {
 
 /**
  * Converts a single number into hex value
- * @param {number} number: Value ranging from 0 to 15 to be converted into hex value 
+ * @param {number} number: Value ranging from 0 to 15 to be converted into hex value
+ * @returns {String}
  */
 const convertNumberToHex = (number) => {
     if (number < 10) {
@@ -92,6 +95,7 @@ const displayMatrix = () => {
 /**
  * Creates a div element representing a row containing more div elements with byte values
  * @param {number[]} row: Row containing byte values
+ * @returns {HTMLDivElement}
  */
 const createRow = (row) => {
     let newRowElement = document.createElement("div");
@@ -105,8 +109,9 @@ const createRow = (row) => {
 }
 
 /**
- * Creates valid sequences based off of the generated matrix
- * @param {number} difficulty: Determine the first and last sequence values
+ * Creates valid sequences based off code matrix
+ * @param {number} bufferCount: Determines path count
+ * @param {String[][]} matrix: Code matrix
  */
 const createSequences = (bufferCount, matrix) => {
     let tempMatrix = matrix;
@@ -128,6 +133,12 @@ const createSequences = (bufferCount, matrix) => {
     newSequences.forEach((sequence) => sequences.push(sequence));
 }
 
+/**
+ * Takes an array of string values and breaks it into smaller arrays
+ * @param {String[]} path: bufferCount length array holding byte values from the generated matrix
+ * @param {number} numOfSeq: Number of sequences to slice from path
+ * @returns {string[][]}
+ */
 const splitPath = (path, numOfSeq) => {
     let currPathIndex = Math.floor(Math.random() * 2);
     let newSequences = [];
@@ -149,6 +160,7 @@ const splitPath = (path, numOfSeq) => {
  * @param {boolean} isRowSearch: Determines if next value is taken from row or col
  * @param {Object {row: number, col: number}} prevSelection: Holds indexes of previous value selected
  * @param {Object [][]} matrix: Matrix used to pick values from
+ * @returns {String}
  */
 const getNextValue = (isRowSearch, prevSelection, matrix) => {
     let randIndex = Math.floor(Math.random() * (difficulty - 1));
