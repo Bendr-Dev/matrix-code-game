@@ -4,6 +4,7 @@ const matrixByteValues = [];
 const matrix = [];
 const sequences = [];
 const difficulty = 5;
+const bufferCount = 8;
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
@@ -23,8 +24,8 @@ const generateByteValues = (difficulty) => {
  * Creates a byte value ranging from 00 to FF
  */
 const generateByteValue = () => {
-    let value1 = convertNumberToHex(parseInt(Math.random() * 15));
-    let value2 = convertNumberToHex(parseInt(Math.random() * 15));
+    let value1 = convertNumberToHex(Math.floor(Math.random() * 15));
+    let value2 = convertNumberToHex(Math.floor(Math.random() * 15));
 
     return value1 + value2;
 }
@@ -46,7 +47,7 @@ const generateMatrix = (difficulty) => {
 const generateRow = (difficulty) => {
     let row = [];
     for (let index = 0; index < difficulty; index++) {
-        row.push(matrixByteValues[parseInt(Math.random() * (difficulty - 1))]);
+        row.push(matrixByteValues[Math.floor(Math.random() * (difficulty - 1))]);
     }   
     return row;
 }
@@ -104,85 +105,83 @@ const createRow = (row) => {
 }
 
 /**
- * Creates a valid sequence based off of the generated matrix
- * @param {number} difficulty: Determine the potential size of sequence
+ * Creates valid sequences based off of the generated matrix
+ * @param {number} difficulty: Determine the first and last sequence values
  */
-const createSequence = (difficulty) => {
-    let numberOfSequenceValues = parseInt((Math.random() * 2) + (difficulty - 3));
-    let sequence = [];
+const createSequences = (bufferCount, matrix) => {
+    let tempMatrix = matrix;
+    let newSequencePath = [];
+    let isRowSearch = true;
+    let prevSelection = {
+        row: -1,
+        col: -1
+    };
 
-    for (let index = 0; index < numberOfSequenceValues; index++) {
-        sequence.push(matrixByteValues[parseInt(Math.random() * (difficulty - 1))]);
+    for (let index = 0; index < bufferCount; index++) {
+        newSequencePath.push(getNextValue(isRowSearch, prevSelection, tempMatrix));
+        isRowSearch = !isRowSearch;
     }
 
-    // Check if sequence is valid with matrix
-    sequences.push(sequence);
+    let amountOfSeq = Math.floor(Math.random() * 2) + 2;
+    let newSequences = splitPath(newSequencePath, amountOfSeq);
+    newSequences.sort((a, b) => a.length - b.length);
+    newSequences.forEach((sequence) => sequences.push(sequence));
+}
+
+const splitPath = (path, numOfSeq) => {
+    let currPathIndex = Math.floor(Math.random() * 2);
+    let newSequences = [];
+
+    for (let index = 0; index < numOfSeq; index++) {
+        let randEndIndex = currPathIndex + (Math.floor((Math.random() * 2)) + (index + 1));
+
+        newSequences.push(path.slice(currPathIndex, (randEndIndex + 1)));
+
+        currPathIndex = randEndIndex;
+        !!Math.floor(Math.random() * 2) && currPathIndex++;
+    }
+
+    return newSequences;
 }
 
 /**
- * Tests values of sequence and validates sequence with given matrix
- * @param {number[]} sequence: number combinations to be validated 
- * @param {number[][]} matrix: matrix which the sequence will be tested on
- * @param {number} difficulty: Used to calculate buffer size
+ * Picks and returns a value from the matrix
+ * @param {boolean} isRowSearch: Determines if next value is taken from row or col
+ * @param {Object {row: number, col: number}} prevSelection: Holds indexes of previous value selected
+ * @param {Object [][]} matrix: Matrix used to pick values from
  */
-const checkSequence =
-    (seqPosition, matrix, genSequence, currSequence, difficulty, isRowCheck, bufferCount, currRow, currCol, lastIndex) => {
-    let maxBufferSize = difficulty - 1;
-    let isPattern = false;
-    let matchFound = false;
+const getNextValue = (isRowSearch, prevSelection, matrix) => {
+    let randIndex = Math.floor(Math.random() * (difficulty - 1));
+    let value = null;
 
-    if (isValid(genSequence, currSequence))
-        isPattern = true;
-
-    while (!isPattern && bufferCount < maxBufferSize) {
-        if (isRowCheck) {
-            // Row check
-            // First check if there's a matching value with current sequence value being sought after
-            matrix[currRow].forEach((colSequenceValue, index) => {
-                if (isValid(colSequenceValue, genSequence[seqPosition]) && index !== lastIndex) {
-                    currSequence.push(colSequenceValue);
-                    currCol = index;
-                    seqPosition += 1;
-                    bufferCount += 1;
-                    isRowCheck = !isRowCheck;
-                    matchFound = true;
-                    checkSequence(...arguments);
-                }
-            });
-            // Brute force tatic in case there's no matching sequence value 
-            if (!matchFound) {
-                currSequence.splice(0, currSequence.length);
-                seqPosition = -1;
-                matrix[currRow].forEach((colSequenceValue, index) => {
-                    currSequence.push(colSequenceValue);
-                    currCol = index;
-                    seqPosition += 1;
-                    bufferCount += 1;
-                    isRowCheck = !isRowCheck;
-                    matchFound = true;
-                    checkSequence(...arguments);
-                });
+    if (isRowSearch) {
+        if (prevSelection.row !== -1) {
+            while (!!!matrix[prevSelection.row][randIndex]) {
+                randIndex = Math.floor(Math.random() * (difficulty - 1));
             }
+
+            prevSelection.col = randIndex;
+            value = matrix[prevSelection.row][randIndex];
+            matrix[prevSelection.row][randIndex] = null;
         } else {
-            // Column check
-            for (let index = 0; index < matrix[currRow].length; index++) {
-                if (isValid(matrix[index][currCol], genSequence[seqPosition])) {
-                    currSequence.push(matrix[index][currCol]);
-                    currRow = index;
-                    seqPosition += 1;
-                    bufferCount += 1;
-                    isRowCheck = !isRowCheck;
-                    matchFound = true;
-                    checkSequence(...arguments);
-                }
-            }
+            prevSelection.col = randIndex;
+            prevSelection.row = 0;
+            value = matrix[prevSelection.row][randIndex];
+            matrix[prevSelection.row][randIndex] = null;
         }
+    } else {
+        while (!!!matrix[randIndex][prevSelection.col]) {
+            randIndex = Math.floor(Math.random() * (difficulty - 1));
+        }
+
+        prevSelection.row = randIndex;
+        value = matrix[randIndex][prevSelection.col];
+        matrix[randIndex][prevSelection.col] = null; 
     }
 
-    if (isPattern)
-        return true;
-    else return false;
+    return value;
 }
+
 
 /**
  * Compares two values or two arrays
@@ -194,7 +193,7 @@ const isValid = (value, secondValue) => {
     if (typeof value !== typeof secondValue)
         return false;
 
-    if (typeof value !== "object") 
+    if (typeof value !== "object")
         return value === secondValue;
     
     if (value.length !== secondValue.length)
@@ -213,3 +212,4 @@ const isValid = (value, secondValue) => {
 generateByteValues(difficulty);
 generateMatrix(difficulty);
 displayMatrix();
+createSequences(bufferCount, matrix);

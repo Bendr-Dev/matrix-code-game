@@ -109,7 +109,7 @@ section:last-of-type {
   display: flex;
   flex-direction: column;
   align-content: space-between;
-  padding: 1rem;
+  padding: 3rem;
 }
 
 #code-matrix-content > div {
