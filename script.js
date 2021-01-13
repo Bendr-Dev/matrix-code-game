@@ -1,10 +1,17 @@
+"use strict";
+
 const matrixDisplay = document.getElementById("code-matrix-content");
+const sequenceDisplay = document.getElementById("code-sequence-content");
+const bufferDisplay = document.getElementById("buffer");
+const timeDisplay = document.getElementById("time");
 
 const matrixByteValues = [];
 const matrix = [];
 const sequences = [];
 const difficulty = 5;
 const bufferCount = 8;
+const bufferSeq = [];
+const startTime = 20;
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
@@ -168,6 +175,7 @@ const getNextValue = (isRowSearch, prevSelection, matrix) => {
 
     if (isRowSearch) {
         if (prevSelection.row !== -1) {
+            // Makes sure we don't select an already selected value
             while (!!!matrix[prevSelection.row][randIndex]) {
                 randIndex = Math.floor(Math.random() * (difficulty - 1));
             }
@@ -192,6 +200,56 @@ const getNextValue = (isRowSearch, prevSelection, matrix) => {
     }
 
     return value;
+}
+
+
+/**
+ * Displays sequences generated into DOM
+ * @param {string[][]} sequences: Contains array's of string sequences 
+ * @param {HTMLElement} sequenceDisplay: Container in the DOM to insert sequence HTMLElements
+ */
+const displaySequences = (sequences, sequenceDisplay) => {
+    while (sequenceDisplay.firstChild) {
+        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
+    }
+
+    sequences.forEach((sequence) => {
+        let newSequenceDiv = document.createElement("div");
+        sequence.forEach((seqValue) => {
+            let newSeqValueDiv = document.createElement("div");
+            newSeqValueDiv.innerHTML = seqValue;
+            newSequenceDiv.appendChild(newSeqValueDiv);
+        });
+        sequenceDisplay.appendChild(newSequenceDiv);
+    });
+}
+
+/**
+ * Creates and displays boxes for future sequence value selections
+ * @param {number} bufferCount: Max amount of sequences user can enter
+ * @param {HTMLElement} bufferDisplay: Container for displaying buffer selections 
+ */
+const createEmptyBufferSlots = (bufferCount, bufferDisplay) => {
+    while (bufferDisplay.firstChild) {
+        bufferDisplay.removeChild(bufferDisplay.lastChild);
+    }
+
+    for (let index = 0; index < bufferCount; index++) {
+        bufferDisplay.appendChild(document.createElement("div"));
+    }
+}
+
+/**
+ * Creates a timer that counts down in ms
+ * @param {number} startTime: Initial time to count down 
+ * @param {HTMLElement} timeDisplay: Container to display timer
+ */
+const timer = (startTime, timeDisplay) => {
+    let currTime = Date.now();
+    setInterval(() => {
+        let elapsedTime = Date.now() - currTime;
+        timeDisplay.innerHTML = (startTime - (elapsedTime / 1000)).toFixed(2);
+    }, 100);
 }
 
 
@@ -225,3 +283,6 @@ generateByteValues(difficulty);
 generateMatrix(difficulty);
 displayMatrix();
 createSequences(bufferCount, matrix);
+displaySequences(sequences, sequenceDisplay);
+createEmptyBufferSlots(bufferCount, bufferDisplay);
+//timer(startTime, timeDisplay);
