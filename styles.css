@@ -55,7 +55,7 @@ section:first-of-type {
 
 section:first-of-type h2 {
   color: var(--headline);
-  font-size: 28px;
+  font-size: 24px;
 }
 
 section:first-of-type > div {
@@ -76,22 +76,22 @@ section:first-of-type > div > div {
 }
 
 #buffer div {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   margin: 0.5rem;
   border: 1px dashed var(--secondary);
   color: var(--secondary);
-  font-size: 32px;
+  font-size: 24px;
   text-align: center;
 }
 
 #timer div {
-  width: 100px;
-  height: 50px;
+  width: 80px;
+  height: 40px;
   margin: 0.5rem;
   border: 1px dashed var(--secondary);
   color: var(--secondary);
-  font-size: 32px;
+  font-size: 24px;
   text-align: center;
 }
 
@@ -104,7 +104,7 @@ section:last-of-type {
 /* Sequence */
 #code-sequence {
   margin: 2rem;
-  border: 1px solid #ffc107;
+  border: 1px solid var(--secondary);
   border-radius: 2px;
   height: fit-content;
 }
@@ -112,9 +112,9 @@ section:last-of-type {
 #code-sequence div:first-of-type h3 {
   padding: 1rem;
   margin: 0;
-  border-bottom: 1px solid #ffc107;
-  font-size: 36px;
-  color: #ffc107;
+  border-bottom: 1px solid var(--secondary);
+  font-size: 24px;
+  color: var(--secondary);
 }
 
 #code-sequence-content {
@@ -130,45 +130,50 @@ section:last-of-type {
 
 #code-sequence-content > div div {
   margin: 0.5rem;
-  font-size: 32px;
-  color: #ffc107;
+  font-size: 24px;
+  color: var(--secondary);
 }
 
 /* Code Matrix Grid */
 #code-matrix {
   margin: 2rem;
-  border: 1px solid #ffc107;
+  border: 1px solid var(--secondary);
   border-radius: 2px;
 }
 
 #code-matrix div:first-of-type h3 {
   padding: 1rem;
   margin: 0;
-  background-color: #ffc107;
-  font-size: 36px;
+  background-color: var(--secondary);
+  font-size: 24px;
   color: #111;
 }
 
 #code-matrix-content {
-  display: flex;
-  flex-direction: column;
-  align-content: space-between;
+  display: grid;
+  grid-template-rows: 40px 40px 40px 40px 40px;
+  grid-template-columns: 40px 40px 40px 40px 40px;
   padding: 1rem;
 }
 
 #code-matrix-content > div {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
+  justify-items: center;
+  color: var(--secondary);
+  text-align: center;
+  font-size: 24px;
 }
 
-#code-matrix-content > div div {
-  color: #ffc107;
-  width: 50px;
-  height: 50px;
-  font-size: 32px;
-  margin: 1rem;
-  text-align: center;
-  border: 3px solid var(--background-color);
+/* Hovering over matrix */
+.highlight-high:hover {
+  cursor: pointer;
+  border: 2px dashed var(--main);
+  color: var(--main);
+}
+
+.highlight-low {
+  background-color: rgba(102, 252, 241, 0.1);
+}
+
+.highlight-high {
+  background-color: rgba(102, 252, 241, 0.2);
 }
