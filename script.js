@@ -25,18 +25,19 @@ const matrix = createNewMatrix(difficulty);
 const sequences = createSequences(bufferCount, matrix, difficulty);
 const bufferSeq = []; // User's selections
 const startTime = 20;
-const currLocation = {
+const currLocation = { // Keep a cache of where the user has selected on the matrix
     isRow: true,
     row: 0,
     col: 0
 };
 
 /**
- * 
- * @param {*} matrix 
- * @param {*} matrixDisplay 
- * @param {*} gridElements 
- * @param {*} difficulty 
+ * Creates div elements that store matrix values and calls function to
+ * add UI/UX
+ * @param {string[][]} matrix 
+ * @param {HTMLElement} matrixDisplay 
+ * @param {HTMLElement[][]} gridElements 
+ * @param {number} difficulty 
  */
 const displayMatrix = (matrix, matrixDisplay, gridElements, difficulty) => {
     if (matrix.length > 0) {
@@ -66,10 +67,100 @@ const initializeGridElements = (gridElements, matrixDisplay, difficulty) => {
     for (let index = 0; index < difficulty; index++) {
         gridElements.push(tempGridEl.splice(0, difficulty));
     }
+
+    highlightCurrentSection(gridElements, currLocation);
+    addListeners(gridElements);
 }
 
+/**
+ * Adds highlight class to current row or column user is selecting value from
+ * @param {HTMLElement[][]} gridElements 
+ * @param {{ isRow: boolean, row: number, col: number }} currLocation 
+ */
 const highlightCurrentSection = (gridElements, currLocation) => {
+    if (currLocation.isRow) {
+        for (let index = 0; index < gridElements.length; index++) {
+            gridElements[index][currLocation.col].classList.remove("highlight-high");
+        }
 
+        gridElements[currLocation.row].forEach((element) => {
+            element.classList.add("highlight-high");
+        });
+    } else {
+        gridElements[currLocation.row].forEach((element) => {
+            element.classList.remove("highlight-high");
+        });
+
+        for (let index = 0; index < gridElements.length; index++) {
+            gridElements[index][currLocation.col].classList.add("highlight-high");
+        }
+    }
+}
+
+/**
+ * Highlights row/col opposite to what section the user is selecting
+ * @param {HTMLElement[][]} gridElements 
+ * @param {{ isRow: boolean, row: number, col: number}} currLocation 
+ * @param {{row: number, col: number}} hoverLocation 
+ */
+const hoverListener = (gridElements, currLocation, hoverLocation) => {
+    clearClass("highlight-low", gridElements);
+    if (currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col] !== "[ ]" 
+    && currLocation.row === hoverLocation.row) {
+        for (let index = 0; index < gridElements.length; index++) {
+            gridElements[index][hoverLocation.col].classList.toggle("highlight-low");
+        }
+    } else if (!currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col] !== "[ ]" 
+        && currLocation.col === hoverLocation.col) {
+        gridElements[hoverLocation.row].forEach(element => element.classList.toggle("highlight-low"));
+    }
+}
+
+/**
+ * Handles when a user clicks on a matrix value 
+ * @param {HTMLElement[][]} gridElements 
+ * @param {{ isRow: boolean, row: number, col: number}} currLocation 
+ * @param {{row: number, col: number}} clickLocation 
+ */
+const clickListener = (gridElements, currLocation, clickLocation) => {
+    if (currLocation.isRow && gridElements[clickLocation.row][clickLocation.col] !== "[ ]" 
+        && currLocation.row === clickLocation.row) {
+        currLocation.col = clickLocation.col;
+        currLocation.isRow = !currLocation.isRow;
+        highlightCurrentSection(gridElements, currLocation);
+    } else if (!currLocation.isRow && gridElements[clickLocation.row][clickLocation.col] !== "[ ]"
+        && currLocation.col === clickLocation.col) {
+        currLocation.row = clickLocation.row;
+        currLocation.isRow = !currLocation.isRow;
+        highlightCurrentSection(gridElements, currLocation);
+    }
+}
+
+/**
+ * Removes a class from all elements
+ * @param {string} className: Name of class to remove 
+ * @param {HTMLElement[][]} gridElements: Elements to remove class from
+ */
+const clearClass = (className, gridElements) => {
+    for (let i = 0; i < gridElements.length; i++) {
+        for (let j = 0; j < gridElements.length; j++) {
+            gridElements[i][j].classList.remove(className);
+        }
+    }
+}
+
+/**
+ * Adds listeners to all elements on the grid (matrix)
+ * @param {HTMLElements[][]} gridElements: Elements to apply listeners too
+ */
+const addListeners = (gridElements) => {
+    for (let i = 0; i < gridElements.length; i++) {
+        for (let j = 0; j < gridElements.length; j++) {
+            gridElements[i][j].addEventListener("mouseover", () => hoverListener(gridElements, currLocation, {row: i, col: j}));
+            gridElements[i][j].addEventListener("mouseleave", () => hoverListener(gridElements, currLocation, {row: i, col: j}));
+            gridElements[i][j].addEventListener("click", () => clickListener(gridElements, currLocation, {row: i, col: j}));
+        }
+    }
 }
 
 

@@ -85,7 +85,7 @@ const convertNumberToHex = (number) => {
 /**
  * Creates an matrix with random 2-length string values
  * @param {number} difficulty: Determines size of matrix
- * @returns {generateMatrix(difficulty)}
+ * @returns { string[][] }
  */
 export const createNewMatrix = (difficulty) => {
     generateByteValues(difficulty);
