@@ -105,12 +105,12 @@ const highlightCurrentSection = (gridElements, currLocation) => {
  */
 const hoverListener = (gridElements, currLocation, hoverLocation) => {
     clearClass("highlight-low", gridElements);
-    if (currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col] !== "[ ]" 
+    if (currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col].innerHTML !== "[ ]" 
     && currLocation.row === hoverLocation.row) {
         for (let index = 0; index < gridElements.length; index++) {
             gridElements[index][hoverLocation.col].classList.toggle("highlight-low");
         }
-    } else if (!currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col] !== "[ ]" 
+    } else if (!currLocation.isRow && gridElements[hoverLocation.row][hoverLocation.col].innerHTML !== "[ ]" 
         && currLocation.col === hoverLocation.col) {
         gridElements[hoverLocation.row].forEach(element => element.classList.toggle("highlight-low"));
     }
@@ -123,15 +123,19 @@ const hoverListener = (gridElements, currLocation, hoverLocation) => {
  * @param {{row: number, col: number}} clickLocation 
  */
 const clickListener = (gridElements, currLocation, clickLocation) => {
-    if (currLocation.isRow && gridElements[clickLocation.row][clickLocation.col] !== "[ ]" 
+    if (currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]" 
         && currLocation.row === clickLocation.row) {
         currLocation.col = clickLocation.col;
         currLocation.isRow = !currLocation.isRow;
+        updateBufferSeq(bufferSeq, bufferCount, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]"
         highlightCurrentSection(gridElements, currLocation);
-    } else if (!currLocation.isRow && gridElements[clickLocation.row][clickLocation.col] !== "[ ]"
+    } else if (!currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]"
         && currLocation.col === clickLocation.col) {
         currLocation.row = clickLocation.row;
         currLocation.isRow = !currLocation.isRow;
+        updateBufferSeq(bufferSeq, bufferCount, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]"
         highlightCurrentSection(gridElements, currLocation);
     }
 }
@@ -161,6 +165,18 @@ const addListeners = (gridElements) => {
             gridElements[i][j].addEventListener("click", () => clickListener(gridElements, currLocation, {row: i, col: j}));
         }
     }
+}
+
+const updateBufferSeq = (bufferSeq, bufferCount, byteValue) => {
+    if (bufferSeq.length < bufferCount) {
+        bufferSeq.push(byteValue);
+    }
+
+    bufferDisplay.querySelectorAll("div").forEach((element, index) => {
+        if (!!bufferSeq[index]) {
+         element.innerHTML = bufferSeq[index];
+        }
+    });
 }
 
 
