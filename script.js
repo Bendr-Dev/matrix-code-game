@@ -251,10 +251,10 @@ const updateBufferSeq = (bufferSeq, bufferCount, byteValue) => {
         }
     });
 
-    checkSeqCompletion(byteValue, trackSeqCompletion)
+    checkSeqCompletion(byteValue, trackSeqCompletion, bufferSeq, bufferCount)
 }
 
-const checkSeqCompletion = (byteValue, trackSeqCompletion) => {
+const checkSeqCompletion = (byteValue, trackSeqCompletion, bufferSeq, bufferCount) => {
     trackSeqCompletion.forEach((trackSeq) => {
         if (trackSeq.complete === 0) {
             if (trackSeq.seq[trackSeq.currIndex + 1] === byteValue) {
@@ -271,9 +271,11 @@ const checkSeqCompletion = (byteValue, trackSeqCompletion) => {
                 trackSeq.currIndex = -1;
             }
         }
+        
+        if (trackSeq.complete === 0 && (bufferCount - bufferSeq.length) < (trackSeq.seq.length - trackSeq.currIndex)) {
+            trackSeq.complete = -1;
+        }
     });
-    // Do bufferSeq length minus currIndex to determine if user can complete sequence
-    // If not set complete to -1
 }
 
 /**
