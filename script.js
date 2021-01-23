@@ -19,8 +19,6 @@ const timeDisplay = document.getElementById("time");
 const gridElements = []; // Used to grab DOM elements
 const difficulty = 5;
 const bufferCount = 8; // Amount of attempts user has
-
-
 const matrix = createNewMatrix(difficulty);
 const sequences = createSequences(bufferCount, matrix, difficulty);
 const bufferSeq = []; // User's selections
@@ -30,6 +28,17 @@ const currLocation = { // Keep a cache of where the user has selected on the mat
     row: 0,
     col: 0
 };
+const trackSeqCompletion = [];
+
+sequences.forEach(sequence => {
+    trackSeqCompletion.push({
+        seq: sequence,
+        currIndex: -1,
+        complete: 0
+    });
+});
+
+timeDisplay.innerHTML = `${startTime}.00`; // Initialize display
 
 /**
  * Creates div elements that store matrix values and calls function to
@@ -50,6 +59,66 @@ const displayMatrix = (matrix, matrixDisplay, gridElements, difficulty) => {
         });
         initializeGridElements(gridElements, matrixDisplay, difficulty);
     }
+}
+
+/**
+ * Displays sequences generated into DOM
+ * @param {string[][]} sequences: Contains array's of string sequences 
+ * @param {HTMLElement} sequenceDisplay: Container in the DOM to insert sequence HTMLElements
+ */
+const displaySequences = (sequences, sequenceDisplay) => {
+    while (sequenceDisplay.firstChild) {
+        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
+    }
+
+    sequences.forEach((sequence) => {
+        let newSequenceDiv = document.createElement("div");
+        sequence.forEach((seqValue) => {
+            let newSeqValueDiv = document.createElement("div");
+            newSeqValueDiv.innerHTML = seqValue;
+            newSequenceDiv.appendChild(newSeqValueDiv);
+        });
+        sequenceDisplay.appendChild(newSequenceDiv);
+    });
+}
+
+/**
+ * Creates and displays boxes for future sequence value selections
+ * @param {number} bufferCount: Max amount of sequences user can enter
+ * @param {HTMLElement} bufferDisplay: Container for displaying buffer selections 
+ */
+const createEmptyBufferSlots = (bufferCount, bufferDisplay) => {
+    while (bufferDisplay.firstChild) {
+        bufferDisplay.removeChild(bufferDisplay.lastChild);
+    }
+
+    for (let index = 0; index < bufferCount; index++) {
+        bufferDisplay.appendChild(document.createElement("div"));
+    }
+}
+
+/**
+ * Creates a timer that counts down in ms
+ * @param {number} startTime: Initial time to count down 
+ * @param {HTMLElement} timeDisplay: Container to display timer
+ */
+const startTimer = (startTime, timeDisplay) => {
+    let currTime = Date.now();
+    const timer = setInterval(() => {
+        let elapsedTime = Date.now() - currTime;
+        if ((startTime - (elapsedTime / 1000)).toFixed(2) >= 0) {
+            timeDisplay.innerHTML = (startTime - (elapsedTime / 1000)).toFixed(2);
+        } else {
+            timeDisplay.innerHTML = "0.00";
+            clearInterval(timer);
+
+            trackSeqCompletion.forEach((trackSeq) => {
+                if (trackSeq.complete === 0) {
+                    trackSeq.complete = -1;
+                }
+            });
+        }
+    }, 100);
 }
 
 /**
@@ -172,63 +241,40 @@ const updateBufferSeq = (bufferSeq, bufferCount, byteValue) => {
         bufferSeq.push(byteValue);
     }
 
+    if (bufferSeq.length === 1) {
+        startTimer(startTime, timeDisplay);
+    }
+
     bufferDisplay.querySelectorAll("div").forEach((element, index) => {
         if (!!bufferSeq[index]) {
          element.innerHTML = bufferSeq[index];
         }
     });
+
+    checkSeqCompletion(byteValue, trackSeqCompletion)
 }
 
+const checkSeqCompletion = (byteValue, trackSeqCompletion) => {
+    trackSeqCompletion.forEach((trackSeq) => {
+        if (trackSeq.complete === 0) {
+            if (trackSeq.seq[trackSeq.currIndex + 1] === byteValue) {
+                trackSeq.currIndex += 1;
 
-/**
- * Displays sequences generated into DOM
- * @param {string[][]} sequences: Contains array's of string sequences 
- * @param {HTMLElement} sequenceDisplay: Container in the DOM to insert sequence HTMLElements
- */
-const displaySequences = (sequences, sequenceDisplay) => {
-    while (sequenceDisplay.firstChild) {
-        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
-    }
-
-    sequences.forEach((sequence) => {
-        let newSequenceDiv = document.createElement("div");
-        sequence.forEach((seqValue) => {
-            let newSeqValueDiv = document.createElement("div");
-            newSeqValueDiv.innerHTML = seqValue;
-            newSequenceDiv.appendChild(newSeqValueDiv);
-        });
-        sequenceDisplay.appendChild(newSequenceDiv);
+                if (trackSeq.currIndex + 1 === trackSeq.seq.length) {
+                    trackSeq.complete = 1;
+                }
+            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[trackSeq.currIndex] === byteValue) {
+                
+            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[0] === byteValue) {
+                trackSeq.currIndex = 0;
+            } else {
+                trackSeq.currIndex = -1;
+            }
+        }
     });
+    // Do bufferSeq length minus currIndex to determine if user can complete sequence
+    // If not set complete to -1
 }
-
-/**
- * Creates and displays boxes for future sequence value selections
- * @param {number} bufferCount: Max amount of sequences user can enter
- * @param {HTMLElement} bufferDisplay: Container for displaying buffer selections 
- */
-const createEmptyBufferSlots = (bufferCount, bufferDisplay) => {
-    while (bufferDisplay.firstChild) {
-        bufferDisplay.removeChild(bufferDisplay.lastChild);
-    }
-
-    for (let index = 0; index < bufferCount; index++) {
-        bufferDisplay.appendChild(document.createElement("div"));
-    }
-}
-
-/**
- * Creates a timer that counts down in ms
- * @param {number} startTime: Initial time to count down 
- * @param {HTMLElement} timeDisplay: Container to display timer
- */
-const startTimer = (startTime, timeDisplay) => {
-    let currTime = Date.now();
-    setInterval(() => {
-        let elapsedTime = Date.now() - currTime;
-        timeDisplay.innerHTML = (startTime - (elapsedTime / 1000)).toFixed(2);
-    }, 100);
-}
-
 
 /**
  * Compares two values or two arrays
@@ -259,4 +305,3 @@ const isValid = (value, secondValue) => {
 displayMatrix(matrix, matrixDisplay, gridElements, difficulty);
 displaySequences(sequences, sequenceDisplay);
 createEmptyBufferSlots(bufferCount, bufferDisplay);
-//startTimer(startTime, timeDisplay);
