@@ -117,6 +117,7 @@ const startTimer = (startTime, timeDisplay) => {
                     trackSeq.complete = -1;
                 }
             });
+            updateSeqDisplay(trackSeqCompletion, sequenceDisplay);
         }
     }, 100);
 }
@@ -271,37 +272,25 @@ const checkSeqCompletion = (byteValue, trackSeqCompletion, bufferSeq, bufferCoun
                 trackSeq.currIndex = -1;
             }
         }
-        
+
         if (trackSeq.complete === 0 && (bufferCount - bufferSeq.length) < (trackSeq.seq.length - trackSeq.currIndex)) {
             trackSeq.complete = -1;
         }
     });
+
+    updateSeqDisplay(trackSeqCompletion, sequenceDisplay);
 }
 
-/**
- * Compares two values or two arrays
- * @param {any} value: First value to compare
- * @param {any} secondValue: Second value to compare with first value
- * @returns boolean
- */
-const isValid = (value, secondValue) => {
-    if (typeof value !== typeof secondValue)
-        return false;
+const updateSeqDisplay = (trackSeqCompletion, sequenceDisplay) => {
+    let sequences = sequenceDisplay.querySelectorAll("#code-sequence-content > div");
 
-    if (typeof value !== "object")
-        return value === secondValue;
-    
-    if (value.length !== secondValue.length)
-        return false;
-    else {
-        let valid = true;
-        value.forEach((value, index) => {
-            if (value !== secondValue[index]) {
-                valid = false;
-            }
-        });
-        return valid;
-    }
+    trackSeqCompletion.forEach((trackSeq, index) => {
+        if (trackSeq.complete === 1) {
+            sequences[index].classList.add("sequence-complete");
+        } else if (trackSeq.complete === -1) {
+            sequences[index].classList.add("sequence-failed");
+        }
+    });
 }
 
 displayMatrix(matrix, matrixDisplay, gridElements, difficulty);
