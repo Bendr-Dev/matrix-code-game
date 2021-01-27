@@ -1,6 +1,9 @@
 /*
- *  Sequence generation
+ *  Handles sequence generation and display functionality
  */
+
+// Selectors
+export const sequenceDisplay = document.getElementById("code-sequence-content");
 
 /**
  * Takes an array of string values and breaks it into smaller arrays
@@ -62,6 +65,73 @@ const getNextValue = (isRowSearch, prevSelection, tempMatrix, difficulty) => {
     }
 
     return value;
+}
+
+/**
+ * Updates a completed sequence
+ * @param {[{}]} trackSeqCompletion 
+ * @param {HTMLElement} sequenceDisplay 
+ */
+export const updateSeqDisplay = (trackSeqCompletion, sequenceDisplay) => {
+    let sequences = sequenceDisplay.querySelectorAll("#code-sequence-content > div");
+
+    trackSeqCompletion.forEach((trackSeq, index) => {
+        if (trackSeq.complete !== 0) {
+            if (trackSeq.complete === 1) {
+                sequences[index].classList.add("sequence-complete");
+            } else {
+                sequences[index].classList.add("sequence-failed");
+            }
+        }
+    });
+}
+
+export const checkSeqCompletion = (byteValue, trackSeqCompletion, bufferSeq, bufferCount) => {
+    trackSeqCompletion.forEach((trackSeq) => {
+        if (trackSeq.complete === 0) {
+            if (trackSeq.seq[trackSeq.currIndex + 1] === byteValue) {
+                trackSeq.currIndex += 1;
+
+                if (trackSeq.currIndex + 1 === trackSeq.seq.length) {
+                    trackSeq.complete = 1;
+                }
+            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[trackSeq.currIndex] === byteValue) {
+                
+            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[0] === byteValue) {
+                trackSeq.currIndex = 0;
+            } else {
+                trackSeq.currIndex = -1;
+            }
+        }
+
+        let tempCurrIndex = trackSeq.currIndex + 1;
+        if (trackSeq.complete === 0 && (bufferCount - bufferSeq.length) < (trackSeq.seq.length - tempCurrIndex)) {
+            trackSeq.complete = -1;
+        }
+    });
+
+    updateSeqDisplay(trackSeqCompletion, sequenceDisplay);
+}
+
+/**
+ * Displays sequences generated into DOM
+ * @param {string[][]} sequences: Contains array's of string sequences 
+ * @param {HTMLElement} sequenceDisplay: Container in the DOM to insert sequence HTMLElements
+ */
+export const displaySequences = (sequences, sequenceDisplay) => {
+    while (sequenceDisplay.firstChild) {
+        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
+    }
+
+    sequences.forEach((sequence) => {
+        let newSequenceDiv = document.createElement("div");
+        sequence.forEach((seqValue) => {
+            let newSeqValueDiv = document.createElement("div");
+            newSeqValueDiv.innerHTML = seqValue;
+            newSequenceDiv.appendChild(newSeqValueDiv);
+        });
+        sequenceDisplay.appendChild(newSequenceDiv);
+    });
 }
 
 /**

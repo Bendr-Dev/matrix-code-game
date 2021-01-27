@@ -1,8 +1,11 @@
 /*
- *  Matrix generation
+ *  Handles matrix generation and display functionality
  */ 
 
-const matrixByteValues = [];
+// Selectors
+export const matrixDisplay = document.getElementById("code-matrix-content");
+
+ const matrixByteValues = [];
 
 /**
  * Creates an array of byte values in hexadecimal to be used for game
@@ -79,6 +82,30 @@ const convertNumberToHex = (number) => {
             case 15:
                 return "F";
         }
+    }
+}
+
+/**
+ * Creates div elements that store matrix values and calls function to
+ * add UI/UX
+ * @param {string[][]} matrix 
+ * @param {HTMLElement} matrixDisplay 
+ * @param {HTMLElement[][]} gridElements 
+ * @param {number} difficulty 
+ */
+export const displayMatrix = (matrix, matrixDisplay) => {
+    while (matrixDisplay.firstChild) {
+        matrixDisplay.removeChild(matrixDisplay.lastChild);
+    }
+
+    if (matrix.length > 0) {
+        matrix.forEach((row) => {
+            row.forEach((byte) => {
+                let newByteElement = document.createElement("div");
+                newByteElement.innerHTML = byte;
+                matrixDisplay.appendChild(newByteElement);
+            });
+        });
     }
 }
 

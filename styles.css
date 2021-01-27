@@ -126,12 +126,16 @@ section:last-of-type {
 #code-sequence-content > div {
   display: flex;
   flex-direction: row;
+  margin: 0.2rem;
 }
 
 #code-sequence-content > div div {
   margin: 0.5rem;
   font-size: 24px;
+  width: 40px;
+  height: 40px;
   color: var(--secondary);
+  text-align: center;
 }
 
 /* Code Matrix Grid */
@@ -176,4 +180,20 @@ section:last-of-type {
 
 .highlight-high {
   background-color: rgba(102, 252, 241, 0.2);
+}
+
+.sequence-complete {
+  background-color: green;
+}
+
+#code-sequence-content .sequence-complete > div {
+  color: #111;
+}
+
+.sequence-failed {
+  background-color: red;
+}
+
+#code-sequence-content .sequence-failed div {
+  color: #111;
 }
