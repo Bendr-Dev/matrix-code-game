@@ -1,2 +1,2 @@
 # matrix-code-game
-Matrix code game from Cyberpunk 2077
+A spin-off of the matrix code game from Cyberpunk 2077
