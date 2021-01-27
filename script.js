@@ -1,86 +1,64 @@
 "use strict";
-import { createNewMatrix } from "./matrix.js";
-import { createSequences } from "./sequence.js";
+import { createNewMatrix, displayMatrix, matrixDisplay } from "./matrix.js";
+import { createSequences, displaySequences, checkSeqCompletion, updateSeqDisplay, sequenceDisplay } from "./sequence.js";
 
-/*
- *  Selectors
- */
-
-const matrixDisplay = document.getElementById("code-matrix-content");
-const sequenceDisplay = document.getElementById("code-sequence-content");
+// Selectors
 const bufferDisplay = document.getElementById("buffer");
 const timeDisplay = document.getElementById("time");
 
-
-/*
- *  Game variables
- */
-
-const gridElements = []; // Used to grab DOM elements
-const difficulty = 5;
-const bufferCount = 8; // Amount of attempts user has
-const matrix = createNewMatrix(difficulty);
-const sequences = createSequences(bufferCount, matrix, difficulty);
-const bufferSeq = []; // User's selections
-const startTime = 20;
-const currLocation = { // Keep a cache of where the user has selected on the matrix
-    isRow: true,
-    row: 0,
-    col: 0
+// Game variables
+const gridElements = []; // Used to grab matrix DOM elements
+const gameState = { // Holds data for the game
+    difficulty: 5,
+    bufferCount: 8,
+    startTime: 20,
+    matrix: null,
+    sequences: null,
+    bufferSeq: [],
+    currLocation: { // Keep a cache of where the user has selected on the matrix
+        isRow: true,
+        row: 0,
+        col: 0
+    },
+    trackCompletion: []
 };
-const trackSeqCompletion = [];
-
-sequences.forEach(sequence => {
-    trackSeqCompletion.push({
-        seq: sequence,
-        currIndex: -1,
-        complete: 0
-    });
-});
-
-timeDisplay.innerHTML = `${startTime}.00`; // Initialize display
 
 /**
- * Creates div elements that store matrix values and calls function to
- * add UI/UX
- * @param {string[][]} matrix 
- * @param {HTMLElement} matrixDisplay 
- * @param {HTMLElement[][]} gridElements 
- * @param {number} difficulty 
+ * Resets certain properties in gameState
+ * @param {{}} gameState
  */
-const displayMatrix = (matrix, matrixDisplay, gridElements, difficulty) => {
-    if (matrix.length > 0) {
-        matrix.forEach((row) => {
-            row.forEach((byte) => {
-                let newByteElement = document.createElement("div");
-                newByteElement.innerHTML = byte;
-                matrixDisplay.appendChild(newByteElement);
-            });
-        });
-        initializeGridElements(gridElements, matrixDisplay, difficulty);
-    }
+const resetGameState = (gameState) => {
+    gameState.matrix = null;
+    gameState.sequences = null;
+    gameState.bufferSeq = [];
+    gameState.currLocation.isRow = true;
+    gameState.currLocation.row = 0;
+    gameState.currLocation.col = 0;
+    gameState.trackCompletion = [];
 }
 
 /**
- * Displays sequences generated into DOM
- * @param {string[][]} sequences: Contains array's of string sequences 
- * @param {HTMLElement} sequenceDisplay: Container in the DOM to insert sequence HTMLElements
+ * 
+ * @param {string[][]} sequences 
+ * @param {[{ seq: string[][], currIndex: number, complete: number }]} trackCompletion 
  */
-const displaySequences = (sequences, sequenceDisplay) => {
-    while (sequenceDisplay.firstChild) {
-        sequenceDisplay.removeChild(sequenceDisplay.lastChild);
+const createNewTrackCompletion = (sequences, trackCompletion) => {
+    if (trackCompletion.length !== 0) {
+        trackCompletion.forEach(() => {
+            trackCompletion.pop();
+        });
     }
 
     sequences.forEach((sequence) => {
-        let newSequenceDiv = document.createElement("div");
-        sequence.forEach((seqValue) => {
-            let newSeqValueDiv = document.createElement("div");
-            newSeqValueDiv.innerHTML = seqValue;
-            newSequenceDiv.appendChild(newSeqValueDiv);
+        trackCompletion.push({
+            seq: sequence,
+            currIndex: -1,
+            complete: 0
         });
-        sequenceDisplay.appendChild(newSequenceDiv);
     });
 }
+
+
 
 /**
  * Creates and displays boxes for future sequence value selections
@@ -102,44 +80,62 @@ const createEmptyBufferSlots = (bufferCount, bufferDisplay) => {
  * @param {number} startTime: Initial time to count down 
  * @param {HTMLElement} timeDisplay: Container to display timer
  */
-const startTimer = (startTime, timeDisplay) => {
+const startTimer = (gameState, timeDisplay) => {
     let currTime = Date.now();
     const timer = setInterval(() => {
         let elapsedTime = Date.now() - currTime;
-        if ((startTime - (elapsedTime / 1000)).toFixed(2) >= 0) {
-            timeDisplay.innerHTML = (startTime - (elapsedTime / 1000)).toFixed(2);
+        if ((gameState.startTime - (elapsedTime / 1000)).toFixed(2) >= 0) {
+            timeDisplay.innerHTML = (gameState.startTime - (elapsedTime / 1000)).toFixed(2);
+            if (checkGameStatus(gameState.trackCompletion)) {
+                clearInterval(timer);
+                const resetTimer = setTimeout(() => {
+                    resetGameState(gameState);
+                    startNewGame(gameState);
+                    clearTimeout(resetTimer);
+                }, 1500);
+            }
         } else {
             timeDisplay.innerHTML = "0.00";
             clearInterval(timer);
 
-            trackSeqCompletion.forEach((trackSeq) => {
+            gameState.trackCompletion.forEach((trackSeq) => {
                 if (trackSeq.complete === 0) {
                     trackSeq.complete = -1;
                 }
             });
-            updateSeqDisplay(trackSeqCompletion, sequenceDisplay);
+            updateSeqDisplay(gameState.trackCompletion, sequenceDisplay);
+            const resetTimer = setTimeout(() => {
+                resetGameState(gameState);
+                startNewGame(gameState);
+                clearTimeout(resetTimer);
+            }, 1500);
         }
     }, 100);
 }
 
 /**
- * Obtains code matrix DOM elements for further manipulation
+ * Obtains matrix DOM elements for further manipulation
  * @param {HTMLElement[][]} gridElements 
  * @param {HTMLElement} matrixDisplay 
- * @param {number} difficulty 
+ * @param {number} difficulty
+ * @param {{ isRow: boolean, row: number, col: number }} currLocation
  */
-const initializeGridElements = (gridElements, matrixDisplay, difficulty) => {
+const initializeGridElements = (matrixDisplay, gameState) => {
+    while (gridElements.length > 0) {
+        gridElements.pop();
+    }
+
     let tempGridEl = [];
     matrixDisplay.querySelectorAll("div").forEach((el) => {
         tempGridEl.push(el);
     });
 
-    for (let index = 0; index < difficulty; index++) {
-        gridElements.push(tempGridEl.splice(0, difficulty));
+    for (let index = 0; index < gameState.difficulty; index++) {
+        gridElements.push(tempGridEl.splice(0, gameState.difficulty));
     }
 
-    highlightCurrentSection(gridElements, currLocation);
-    addListeners(gridElements);
+    highlightCurrentSection(gridElements, gameState.currLocation);
+    addListeners(gridElements, gameState);
 }
 
 /**
@@ -192,21 +188,33 @@ const hoverListener = (gridElements, currLocation, hoverLocation) => {
  * @param {{ isRow: boolean, row: number, col: number}} currLocation 
  * @param {{row: number, col: number}} clickLocation 
  */
-const clickListener = (gridElements, currLocation, clickLocation) => {
-    if (currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]" 
-        && currLocation.row === clickLocation.row) {
-        currLocation.col = clickLocation.col;
-        currLocation.isRow = !currLocation.isRow;
-        updateBufferSeq(bufferSeq, bufferCount, gridElements[clickLocation.row][clickLocation.col].innerHTML);
-        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]"
-        highlightCurrentSection(gridElements, currLocation);
-    } else if (!currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]"
-        && currLocation.col === clickLocation.col) {
-        currLocation.row = clickLocation.row;
-        currLocation.isRow = !currLocation.isRow;
-        updateBufferSeq(bufferSeq, bufferCount, gridElements[clickLocation.row][clickLocation.col].innerHTML);
-        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]"
-        highlightCurrentSection(gridElements, currLocation);
+const clickListener = (gridElements, clickLocation, gameState) => {
+    if (gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]" 
+        && gameState.currLocation.row === clickLocation.row) {
+
+        // Update game state current location
+        gameState.currLocation.col = clickLocation.col;
+        gameState.currLocation.isRow = !gameState.currLocation.isRow;
+
+        // Update buffer sequence and apply change to DOM element
+        updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
+
+        // Highlight the next section
+        highlightCurrentSection(gridElements, gameState.currLocation);
+    } else if (!gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]"
+        && gameState.currLocation.col === clickLocation.col) {
+        
+        // Update game state current location
+        gameState.currLocation.row = clickLocation.row;
+        gameState.currLocation.isRow = !gameState.currLocation.isRow;
+
+        // Update buffer sequence and apply change to DOM element
+        updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
+
+        // Highlight the next section
+        highlightCurrentSection(gridElements, gameState.currLocation);
     }
 }
 
@@ -226,73 +234,54 @@ const clearClass = (className, gridElements) => {
 /**
  * Adds listeners to all elements on the grid (matrix)
  * @param {HTMLElements[][]} gridElements: Elements to apply listeners too
+ * @param {{}} gameState: Holds data pertaining to the state of the game
  */
-const addListeners = (gridElements) => {
+const addListeners = (gridElements, gameState) => {
     for (let i = 0; i < gridElements.length; i++) {
         for (let j = 0; j < gridElements.length; j++) {
-            gridElements[i][j].addEventListener("mouseover", () => hoverListener(gridElements, currLocation, {row: i, col: j}));
-            gridElements[i][j].addEventListener("mouseleave", () => hoverListener(gridElements, currLocation, {row: i, col: j}));
-            gridElements[i][j].addEventListener("click", () => clickListener(gridElements, currLocation, {row: i, col: j}));
+            gridElements[i][j].addEventListener("mouseover", () => hoverListener(gridElements, gameState.currLocation, {row: i, col: j}));
+            gridElements[i][j].addEventListener("mouseleave", () => hoverListener(gridElements, gameState.currLocation, {row: i, col: j}));
+            gridElements[i][j].addEventListener("click", () => clickListener(gridElements, {row: i, col: j}, gameState));
         }
     }
 }
 
-const updateBufferSeq = (bufferSeq, bufferCount, byteValue) => {
-    if (bufferSeq.length < bufferCount) {
-        bufferSeq.push(byteValue);
+const updateBufferSeq = (gameState, byteValue) => {
+    if (gameState.bufferSeq.length < gameState.bufferCount) {
+        gameState.bufferSeq.push(byteValue);
     }
 
-    if (bufferSeq.length === 1) {
-        startTimer(startTime, timeDisplay);
+    if (gameState.bufferSeq.length === 1) {
+        startTimer(gameState, timeDisplay);
     }
 
     bufferDisplay.querySelectorAll("div").forEach((element, index) => {
-        if (!!bufferSeq[index]) {
-         element.innerHTML = bufferSeq[index];
+        if (!!gameState.bufferSeq[index]) {
+         element.innerHTML = gameState.bufferSeq[index];
         }
     });
 
-    checkSeqCompletion(byteValue, trackSeqCompletion, bufferSeq, bufferCount)
+    checkSeqCompletion(byteValue, gameState.trackCompletion, gameState.bufferSeq, gameState.bufferCount);
 }
 
-const checkSeqCompletion = (byteValue, trackSeqCompletion, bufferSeq, bufferCount) => {
-    trackSeqCompletion.forEach((trackSeq) => {
-        if (trackSeq.complete === 0) {
-            if (trackSeq.seq[trackSeq.currIndex + 1] === byteValue) {
-                trackSeq.currIndex += 1;
-
-                if (trackSeq.currIndex + 1 === trackSeq.seq.length) {
-                    trackSeq.complete = 1;
-                }
-            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[trackSeq.currIndex] === byteValue) {
-                
-            } else if (trackSeq.currIndex !== -1 && trackSeq.seq[0] === byteValue) {
-                trackSeq.currIndex = 0;
-            } else {
-                trackSeq.currIndex = -1;
-            }
-        }
-
-        if (trackSeq.complete === 0 && (bufferCount - bufferSeq.length) < (trackSeq.seq.length - trackSeq.currIndex)) {
-            trackSeq.complete = -1;
-        }
-    });
-
-    updateSeqDisplay(trackSeqCompletion, sequenceDisplay);
+const checkGameStatus = (trackCompletion) => {
+    return trackCompletion.every((trackSeq) => trackSeq.complete !== 0);
 }
 
-const updateSeqDisplay = (trackSeqCompletion, sequenceDisplay) => {
-    let sequences = sequenceDisplay.querySelectorAll("#code-sequence-content > div");
-
-    trackSeqCompletion.forEach((trackSeq, index) => {
-        if (trackSeq.complete === 1) {
-            sequences[index].classList.add("sequence-complete");
-        } else if (trackSeq.complete === -1) {
-            sequences[index].classList.add("sequence-failed");
-        }
-    });
+/**
+ * Creates a new game
+ * @param {{}} gameState: Keeps track of user's actions and game information
+ */
+const startNewGame = (gameState) => {
+    gameState.matrix = createNewMatrix(gameState.difficulty);
+    gameState.sequences = createSequences(gameState.bufferCount, gameState.matrix, gameState.difficulty);
+    createNewTrackCompletion(gameState.sequences, gameState.trackCompletion);
+    timeDisplay.innerHTML = `${gameState.startTime}.00`; // Initialize display
+    displayMatrix(gameState.matrix, matrixDisplay);
+    displaySequences(gameState.sequences, sequenceDisplay);
+    createEmptyBufferSlots(gameState.bufferCount, bufferDisplay);
+    initializeGridElements(matrixDisplay, gameState);
 }
 
-displayMatrix(matrix, matrixDisplay, gridElements, difficulty);
-displaySequences(sequences, sequenceDisplay);
-createEmptyBufferSlots(bufferCount, bufferDisplay);
+startNewGame(gameState);
+

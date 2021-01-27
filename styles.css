@@ -132,7 +132,10 @@ section:last-of-type {
 #code-sequence-content > div div {
   margin: 0.5rem;
   font-size: 24px;
+  width: 40px;
+  height: 40px;
   color: var(--secondary);
+  text-align: center;
 }
 
 /* Code Matrix Grid */
