@@ -38,16 +38,14 @@ const resetGameState = (gameState) => {
 }
 
 /**
- * 
+ * Clears previous game state and creates new objects to track sequences
  * @param {string[][]} sequences 
  * @param {[{ seq: string[][], currIndex: number, complete: number }]} trackCompletion 
  */
 const createNewTrackCompletion = (sequences, trackCompletion) => {
-    if (trackCompletion.length !== 0) {
-        trackCompletion.forEach(() => {
-            trackCompletion.pop();
-        });
-    }
+    trackCompletion.length !== 0 && trackCompletion.forEach(() => {
+                                        trackCompletion.pop();
+                                    });
 
     sequences.forEach((sequence) => {
         trackCompletion.push({

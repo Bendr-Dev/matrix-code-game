@@ -13,44 +13,32 @@
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
+  width: calc(100vw - 4rem);
+  height: calc(100vh - 4rem);
+  margin: 2rem;
+  border: 1px solid var(--main);
+  border-radius: 2px;
   font-family: "Open Sans Condensed", sans-serif;
   background-color: var(--background-color);
 }
 
-/* Header */
-header {
-  display: flex;
-  flex-direction: row;
-}
-
-header h1 {
-  padding: 0rem 2rem;
-  background-color: var(--background-color);
-  color: var(--headline);
-  margin: 0.5rem;
-}
-
 /* Content for page */
 main {
-  width: fit-content;
-  margin: 2rem;
-  border: 1px solid var(--main);
-  border-radius: 2px;
-  max-height: calc(100vh - 4rem);
-  max-width: calc(100vw - 4rem);
-}
-
-/* Breach Time and Buffer */
-section:first-of-type {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Breach Time and Matrix */
+section:first-of-type {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  height: 500px;
   justify-content: space-between;
-  margin: 3rem 0rem 0.5rem 0rem;
 }
 
 section:first-of-type h2 {
@@ -60,19 +48,26 @@ section:first-of-type h2 {
 
 section:first-of-type > div {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   margin: 0 2rem;
 }
 
-section:first-of-type > div > div {
-  margin-left: 1rem;
-  border: 1px solid var(--main);
-  background-color: var(--background-color);
+section:first-of-type > div:last-of-type {
+  flex-direction: column;
+}
+
+section:first-of-type > div:first-of-type {
+  align-items: flex-start;
+}
+
+.buffer h2 {
+  color: var(--headline);
+  font-size: 24px;
 }
 
 #buffer {
   display: flex;
+  border: 1px solid var(--main);
 }
 
 #buffer div {
@@ -85,7 +80,15 @@ section:first-of-type > div > div {
   text-align: center;
 }
 
-#timer div {
+section > .timer-box {
+  justify-content: space-between;
+}
+
+#timer {
+  border: 1px solid var(--main);
+}
+
+#timer #time {
   width: 80px;
   height: 40px;
   margin: 0.5rem;
@@ -95,18 +98,22 @@ section:first-of-type > div > div {
   text-align: center;
 }
 
-/* Code Matrix & Sequence */
+/* Buffer & Sequence */
 section:last-of-type {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 450px;
+  height: 500px;
 }
 
 /* Sequence */
 #code-sequence {
-  margin: 2rem;
+  margin: 2rem 0;
   border: 1px solid var(--secondary);
   border-radius: 2px;
-  height: fit-content;
+  height: 300px;
+  width: 100%;
 }
 
 #code-sequence div:first-of-type h3 {
@@ -143,6 +150,7 @@ section:last-of-type {
   margin: 2rem;
   border: 1px solid var(--secondary);
   border-radius: 2px;
+  height: 300px;
 }
 
 #code-matrix div:first-of-type h3 {
@@ -158,6 +166,7 @@ section:last-of-type {
   grid-template-rows: 40px 40px 40px 40px 40px;
   grid-template-columns: 40px 40px 40px 40px 40px;
   padding: 1rem;
+  justify-content: center;
 }
 
 #code-matrix-content > div {
@@ -182,18 +191,93 @@ section:last-of-type {
   background-color: rgba(102, 252, 241, 0.2);
 }
 
+/* Sequence completion */
 .sequence-complete {
-  background-color: green;
+  background-color: #4caf50;
+  transition: background-color 500ms;
+  border-radius: 2px;
 }
 
-#code-sequence-content .sequence-complete > div {
+.sequence-complete::before {
+  content: "SUCCESS";
+  text-align: center;
+  font-size: 24px;
   color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+#code-sequence-content .sequence-complete div {
+  color: #4caf50;
 }
 
 .sequence-failed {
-  background-color: red;
+  background-color: #f44336;
+  border-radius: 2px;
+  transition: background-color 500ms;
+}
+
+.sequence-failed::before {
+  content: "FAILED";
+  text-align: center;
+  font-size: 24px;
+  color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1rem;
 }
 
 #code-sequence-content .sequence-failed div {
-  color: #111;
+  color: #f44336;
+}
+
+/* When user screen is too small to display all components comfortably */
+@media screen and (max-width: 999px), screen and (max-height: 599px) {
+  body {
+    width: calc(100vw - 4rem);
+    height: calc(100vh - 4rem);
+    margin: 2rem;
+    border: 1px solid var(--main);
+    border-radius: 2px;
+    font-family: "Open Sans Condensed", sans-serif;
+    background-color: var(--background-color);
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  main *,
+  #buffer,
+  #code-matrix,
+  section {
+    display: none;
+  }
+
+  main::before {
+    display: flex;
+    width: 100%;
+    height: 50%;
+    align-items: flex-end;
+    justify-content: center;
+    content: "Error:";
+    color: var(--secondary);
+    font-size: 24px;
+  }
+
+  main::after {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: flex-start;
+    justify-content: center;
+    content: "Terminal Size Too Small";
+    color: var(--headline);
+    font-size: 24px;
+  }
 }
