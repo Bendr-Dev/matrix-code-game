@@ -187,32 +187,34 @@ const hoverListener = (gridElements, currLocation, hoverLocation) => {
  * @param {{row: number, col: number}} clickLocation 
  */
 const clickListener = (gridElements, clickLocation, gameState) => {
-    if (gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]" 
-        && gameState.currLocation.row === clickLocation.row) {
+    if (!checkGameStatus(gameState.trackCompletion)) {
+        if (gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]" 
+            && gameState.currLocation.row === clickLocation.row) {
 
-        // Update game state current location
-        gameState.currLocation.col = clickLocation.col;
-        gameState.currLocation.isRow = !gameState.currLocation.isRow;
+            // Update game state current location
+            gameState.currLocation.col = clickLocation.col;
+            gameState.currLocation.isRow = !gameState.currLocation.isRow;
 
-        // Update buffer sequence and apply change to DOM element
-        updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
-        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
+            // Update buffer sequence and apply change to DOM element
+            updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+            gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
 
-        // Highlight the next section
-        highlightCurrentSection(gridElements, gameState.currLocation);
-    } else if (!gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]"
-        && gameState.currLocation.col === clickLocation.col) {
-        
-        // Update game state current location
-        gameState.currLocation.row = clickLocation.row;
-        gameState.currLocation.isRow = !gameState.currLocation.isRow;
+            // Highlight the next section
+            highlightCurrentSection(gridElements, gameState.currLocation);
+        } else if (!gameState.currLocation.isRow && gridElements[clickLocation.row][clickLocation.col].innerHTML !== "[ ]"
+            && gameState.currLocation.col === clickLocation.col) {
+            
+            // Update game state current location
+            gameState.currLocation.row = clickLocation.row;
+            gameState.currLocation.isRow = !gameState.currLocation.isRow;
 
-        // Update buffer sequence and apply change to DOM element
-        updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
-        gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
+            // Update buffer sequence and apply change to DOM element
+            updateBufferSeq(gameState, gridElements[clickLocation.row][clickLocation.col].innerHTML);
+            gridElements[clickLocation.row][clickLocation.col].innerHTML = "[ ]";
 
-        // Highlight the next section
-        highlightCurrentSection(gridElements, gameState.currLocation);
+            // Highlight the next section
+            highlightCurrentSection(gridElements, gameState.currLocation);
+        }
     }
 }
 
