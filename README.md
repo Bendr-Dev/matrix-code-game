@@ -2,6 +2,8 @@
 
 A spin-off of the matrix code game from Cyberpunk 2077
 
+https://bendr-dev.github.io/matrix-code-game/
+
 ---
 # How to play
 
